@@ -152,17 +152,22 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief  This function handles PPP interrupt request.
+  * @brief  This function handles External line 0 interrupt request.
   * @param  None
   * @retval None
   */
-/*void PPP_IRQHandler(void)
+void EXTI0_IRQHandler(void)
 {
-}*/
-
-/**
-  * @}
-  */ 
+  if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+  {
+    /* Toggle LED1 */
+		ToggleLed();
+		NVIC_SystemReset();		
+    
+		/* Clear the EXTI line 0 pending bit */
+    EXTI_ClearITPendingBit(EXTI_Line0);
+  }
+}
 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

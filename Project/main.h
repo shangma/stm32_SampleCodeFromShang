@@ -58,6 +58,7 @@
 /* Exported functions ------------------------------------------------------- */
 void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);
+void ToggleLed(void);
 
 #endif /* __MAIN_H */
 

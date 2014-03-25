@@ -533,10 +533,10 @@ ARM Macro Assembler    Page 9
               00000000 
 Command Line: --debug --xref --cpu=Cortex-M3 --apcs=interwork --depend=..\outpu
 t\startup_stm32l1xx_mdp.d -o..\output\startup_stm32l1xx_mdp.o -IE:\Dropbox\Code
-\stm32\ADC\Project\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include -IC
-:\Keil_v5\ARM\PACK\Keil\STM32L1xx_DFP\1.0.1\Device\Include --predefine="__EVAL 
-SETA 1" --predefine="__MICROLIB SETA 1" --list=.\startup_stm32l1xx_mdp.lst RTE\
-Device\STM32L152RC\startup_stm32l1xx_mdp.s
+\stm32\stm32_SampleCodeFromShang\Project\RTE -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\3.
+20.4\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32L1xx_DFP\1.0.1\Device\Includ
+e --predefine="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --list=.\startup_
+stm32l1xx_mdp.lst RTE\Device\STM32L152RC\startup_stm32l1xx_mdp.s
 
 
 

@@ -9,6 +9,8 @@ Minimum project from Shang Ma as a template for future use
 #define GPIO_PIN_X GPIO_Pin_6
 #define GPIO_PIN_Y GPIO_Pin_7
 #define BSRR_VAL 0x00C0
+#define BSRR_VAL6 0x0040
+#define BSRR_VAL7 0x0080
 
 #define ADC1_DR_ADDRESS    ((uint32_t)0x40012458)
 
@@ -32,28 +34,26 @@ uint8_t USART3Get(void);
 
 void ADC_DMA_Config(void);
 	
-void ADC_Temp_Init(void);
-void ADC_Output(void);
+void EXTI0_Config(void);
 
 
 int main(void)
 {
 		LED_Init();
 		USART3_Init();
+		EXTI0_Config();
 
 	  printf("\r\n%s, %d\r\n", "ARM stm", 32);
 		while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET)
 		{}
 		
-		ADC_Temp_Init();
-		ADC_Output();
+
+			
 		while (1)
 		{
-				/* Set PD0 and PD2 or PD3 and PD7 */
-				GPIOB->BSRRL = BSRR_VAL;
+				GPIOB->BSRRL = BSRR_VAL7;
 				Delay(1000000);
-				/* Reset PD0 and PD2 or PD3 and PD7 */
-				GPIOB->BSRRH = BSRR_VAL;
+				GPIOB->BSRRH = BSRR_VAL7;
 				Delay(1000000);
 		}
 }
@@ -114,21 +114,6 @@ void USART3_Init(void)
     
 		/* Enable USART */
 		USART_Cmd(USART3, ENABLE);
-}
-
-void USART3Put(uint8_t ch)
-{
-		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET)
-    {
-    }
-		USART_SendData(USART3, (uint8_t) ch);
-}
-
-uint8_t USART3Get(void)
-{
-		while ( USART_GetFlagStatus(USART3, USART_FLAG_RXNE) == RESET);
-					
-		return (uint8_t)USART_ReceiveData(USART3);
 }
 
 void ADC_DMA_Config(void)
@@ -207,6 +192,56 @@ void ADC_DMA_Config(void)
 
 }
 
+void EXTI0_Config(void)
+{
+		EXTI_InitTypeDef   EXTI_InitStructure;
+		GPIO_InitTypeDef   GPIO_InitStructure;
+		NVIC_InitTypeDef   NVIC_InitStructure;
+	  
+		/* Enable GPIOA clock */
+		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+		/* Configure PA0 pin as input floating */
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+		GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	  /* Enable SYSCFG clock */
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+		/* Connect EXTI0 Line to PA0 pin */
+		SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
+	
+	  /* Configure EXTI0 line */
+		EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+		EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+		EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;  
+		EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+		EXTI_Init(&EXTI_InitStructure);
+		
+		/* Enable and set EXTI0 Interrupt to the lowest priority */
+		NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
+		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
+		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init(&NVIC_InitStructure);
+}
+
+void USART3Put(uint8_t ch)
+{
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET)
+    {
+    }
+		USART_SendData(USART3, (uint8_t) ch);
+}
+
+uint8_t USART3Get(void)
+{
+		while ( USART_GetFlagStatus(USART3, USART_FLAG_RXNE) == RESET);
+					
+		return (uint8_t)USART_ReceiveData(USART3);
+}
+
+
 /**
   * @brief  Retargets the C library printf function to the USART.
   * @param  None
@@ -225,7 +260,13 @@ PUTCHAR_PROTOTYPE
   return ch;
 }
 
-
+void ToggleLed(void)
+{
+		GPIOB->BSRRL = BSRR_VAL6;
+		Delay(1000000);
+		GPIOB->BSRRH = BSRR_VAL6;
+		Delay(1000000);
+}
 /**
   * @brief  Decrements the TimingDelay variable.
   * @param  None
